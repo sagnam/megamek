@@ -1291,6 +1291,15 @@ public class MovementDisplay extends StatusBarPhaseDisplay {
             return;
         }
 
+        if (!cmd.isMoveLegal()) {
+            ConfirmDialog response = clientgui
+                    .doYesNoBotherDialog("Illegal Move",//$NON-NLS-1$
+                            "This move contains illegal steps that will be discarded.\nAre you sure that is what you wanted to do?");
+            if (!response.getAnswer()) {
+                return;
+            }
+        }
+
         cmd.clipToPossible();
         if ((cmd.length() == 0) && !ce().isAirborne()
             && GUIPreferences.getInstance().getNagForNoAction()) {
