@@ -142,6 +142,10 @@ public interface IPlayer extends ITurnOrdered {
     
     boolean isAllowingTeamChange();
 
+    void setAllowFacingChange(boolean allowChange);
+
+    boolean isAllowingFacingChange();
+
     void setArtyAutoHitHexes(Vector<Coords> artyAutoHitHexes);
 
     Vector<Coords> getArtyAutoHitHexes();
