@@ -253,12 +253,14 @@ import megamek.common.weapons.other.TSEMPWeapon;
 import megamek.common.weapons.ppc.PPCWeapon;
 import megamek.server.commands.AddBotCommand;
 import megamek.server.commands.AllowTeamChangeCommand;
+import megamek.server.commands.AllowFacingChangeCommand;
 import megamek.server.commands.AssignNovaNetServerCommand;
 import megamek.server.commands.CheckBVCommand;
 import megamek.server.commands.CheckBVTeamCommand;
 import megamek.server.commands.DefeatCommand;
 import megamek.server.commands.ExportListCommand;
 import megamek.server.commands.FixElevationCommand;
+import megamek.server.commands.FixFacingCommand;
 import megamek.server.commands.HelpCommand;
 import megamek.server.commands.JoinTeamCommand;
 import megamek.server.commands.KickCommand;
@@ -459,6 +461,18 @@ public class Server implements Runnable {
     private boolean changePlayersTeam = false;
 
     /**
+     * Keeps track of what unit is request to change facing
+     */
+    private Entity unitChangingFace;
+
+    /**
+     * Keeps track of what direction to face unit
+     */
+    private int requestedFacing;
+
+
+
+    /**
      * Stores a set of <code>Coords</code> that have changed during this phase.
      */
     private Set<Coords> hexUpdateSet = new LinkedHashSet<>();
@@ -612,6 +626,8 @@ public class Server implements Runnable {
         registerCommand(new AssignNovaNetServerCommand(this));
         registerCommand(new AllowTeamChangeCommand(this));
         registerCommand(new JoinTeamCommand(this));
+        registerCommand(new FixFacingCommand(this));
+        registerCommand(new AllowFacingChangeCommand(this));
 
         // register terrain processors
         terrainProcessors.add(new FireProcessor(this));
@@ -2244,6 +2260,30 @@ public class Server implements Runnable {
             playerChangingTeam = null;
         }
         changePlayersTeam = false;
+    }
+
+    public void requestFacingChange(Entity entity, int facing) {
+        unitChangingFace = entity;
+        requestedFacing = facing;
+    }
+
+    public void performFacingChange() {
+        unitChangingFace.setFacing(requestedFacing);
+        entityUpdate(unitChangingFace.getId());
+        sendServerChat(unitChangingFace.getDisplayName() + " facing changed to " + requestedFacing + ".");
+        unitChangingFace = null;
+    }
+
+    public boolean isFacingChangeRequestInProgress() {
+        return unitChangingFace != null;
+    }
+
+    public Entity getUnitRequestingFacingChange() {
+        return unitChangingFace;
+    }
+
+    public int getRequestedFacing() {
+        return requestedFacing;
     }
 
     /**
