@@ -4620,7 +4620,7 @@ public class BoardView1 extends JPanel implements IBoardView, Scrollable,
         facingPolys = new Shape[8];
         for (int dir : allDirections) {
             facingPolys[dir] = facingRotate.createTransformedShape(facingPolyTmp);
-            facingRotate.rotate(Math.toRadians(60),HEX_W/2,HEX_H/2);
+            facingRotate.rotate(Math.toRadians(60), HEX_W / 2, HEX_H / 2);
         }
 
         // final facing polygons
@@ -4637,7 +4637,7 @@ public class BoardView1 extends JPanel implements IBoardView, Scrollable,
         finalFacingPolys = new Shape[8];
         for (int dir : allDirections) {
             finalFacingPolys[dir] = facingRotate.createTransformedShape(finalFacingPolyTmp);
-            facingRotate.rotate(Math.toRadians(60),HEX_W/2,HEX_H/2);
+            facingRotate.rotate(Math.toRadians(60), HEX_W / 2, HEX_H / 2);
         }
 
         // movement polygons
@@ -4667,7 +4667,7 @@ public class BoardView1 extends JPanel implements IBoardView, Scrollable,
         movementPolys = new Shape[8];
         for (int dir : allDirections) {
             movementPolys[dir] = facingRotate.createTransformedShape(movementPolyTmp);
-            facingRotate.rotate(Math.toRadians(60),HEX_W/2,HEX_H/2);
+            facingRotate.rotate(Math.toRadians(60), HEX_W / 2, HEX_H / 2);
         }
 
         // Up and Down Arrows
@@ -4676,7 +4676,7 @@ public class BoardView1 extends JPanel implements IBoardView, Scrollable,
         upArrow = facingRotate.createTransformedShape(movementPolyTmp);
 
         facingRotate.setToIdentity();
-        facingRotate.rotate(Math.toRadians(180),HEX_W/2,HEX_H/2);
+        facingRotate.rotate(Math.toRadians(180), HEX_W / 2, HEX_H / 2);
         facingRotate.translate(0, -31);
         downArrow = facingRotate.createTransformedShape(movementPolyTmp);
     }
