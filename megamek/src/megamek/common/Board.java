@@ -482,8 +482,101 @@ public class Board implements Serializable, IBoard {
             IHex other = getHexInDir(x, y, i);
             hex.setExits(other, i, roadsAutoExit);
         }
+        
+        // Internally handled terrain (inclines, cliff-bottoms)
+        initializeAutomaticTerrain(x, y);
+        
         if (event) {
             processBoardEvent(new BoardEvent(this, new Coords(x, y), BoardEvent.BOARD_CHANGED_HEX));
+        }
+    }
+    
+    /** 
+     * Checks all hex edges of the hex at (x,y) if automatically handled 
+     * terrains such as inclines must be placed or removed. 
+     */
+    private void initializeAutomaticTerrain(int x, int y) {
+        IHex hex = getHex(x, y);
+        int origCliffTopExits = 0;
+        int correctedCliffTopExits = 0;
+        int cliffBotExits = 0;
+        int inclineTopExits = 0;
+        int inclineBotExits = 0;
+        int highInclineTopExits = 0;
+        int highInclineBotExits = 0;
+
+        // Get the currently set cliff-tops for correction. When exits
+        // are not specified, the cliff-tops are removed.
+        if (hex.containsTerrain(Terrains.CLIFF_TOP) 
+                && hex.getTerrain(Terrains.CLIFF_TOP).hasExitsSpecified()) {
+            origCliffTopExits = hex.getTerrain(Terrains.CLIFF_TOP).getExits();
+        }
+
+        for (int i = 0; i < 6; i++) {
+            IHex other = getHexInDir(x, y, i);
+            if (other == null) {
+                continue;
+            }
+
+            int levelDiff = hex.getLevel() - other.getLevel();
+            boolean manualCliffTopExitInThisDir = ((origCliffTopExits & (1 << i)) != 0);
+            boolean cliffTopExitInThisDir = false;
+
+            if ( ((levelDiff == 1) || (levelDiff == 2))  
+                    && manualCliffTopExitInThisDir ) {
+                correctedCliffTopExits += (1 << i);
+                cliffTopExitInThisDir = true;
+            }
+
+            // Should there be an incline top?
+            if ( ((levelDiff == 1) || (levelDiff == 2))  
+                    && !cliffTopExitInThisDir ) {
+                inclineTopExits += (1 << i);
+            }
+
+            // Should there be a high level cliff top?
+            if (levelDiff > 2) {
+                highInclineTopExits += (1 << i);
+            }
+
+            // Should there be an incline bottom or a cliff bottom?
+            // This needs to check for a cliff-top in the other hex and
+            // in the opposite direction
+            if ((levelDiff == -1) || (levelDiff == -2)) {
+                if (other.containsTerrain(Terrains.CLIFF_TOP) 
+                        && other.getTerrain(Terrains.CLIFF_TOP).hasExitsSpecified()
+                        && ((other.getTerrain(Terrains.CLIFF_TOP).getExits() & 
+                                (1 << ((i + 3) % 6))) != 0)) {
+
+                    cliffBotExits += (1 << i);
+                } else {
+                    inclineBotExits += (1 << i);
+                }
+            }
+
+            // Should there be a high level cliff bottom?
+            if (levelDiff < -2) {
+                highInclineBotExits += (1 << i);
+            }
+        }
+        addOrRemoveAutoTerrain(hex, Terrains.CLIFF_TOP, correctedCliffTopExits);
+        addOrRemoveAutoTerrain(hex, Terrains.CLIFF_BOTTOM, cliffBotExits);
+        addOrRemoveAutoTerrain(hex, Terrains.INCLINE_TOP, inclineTopExits);
+        addOrRemoveAutoTerrain(hex, Terrains.INCLINE_BOTTOM, inclineBotExits);
+        addOrRemoveAutoTerrain(hex, Terrains.INCLINE_HIGH_TOP, highInclineTopExits);
+        addOrRemoveAutoTerrain(hex, Terrains.INCLINE_HIGH_BOTTOM, highInclineBotExits);
+    }
+    
+    /** 
+     * Adds automatically handled terrain such as inclines when the given
+     * exits value is not 0, otherwise removes it.
+     */
+    private void addOrRemoveAutoTerrain(IHex hex, int terrainType, int exits) {
+        if (exits > 0) {
+            hex.addTerrain(Terrains.getTerrainFactory()
+                    .createTerrain(terrainType, 1, true, exits));
+        } else {
+            hex.removeTerrain(terrainType);
         }
     }
 
@@ -973,6 +1066,12 @@ public class Board implements Serializable, IBoard {
                 int terrainTypes[] = hex.getTerrainTypes();
                 for (int j = 0; j < terrainTypes.length; j++) {
                     int terrType = terrainTypes[j];
+
+                    // do not save internally handled terrains
+                    if (Terrains.AUTOMATIC.contains(terrType)) {
+                        continue;
+                    }
+
                     ITerrain terrain = hex.getTerrain(terrType);
                     if (terrain != null) {
                         if (!firstTerrain) {

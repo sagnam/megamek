@@ -14,6 +14,8 @@
 
 package megamek.common;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Hashtable;
 
 import megamek.server.SmokeCloud;
@@ -105,6 +107,56 @@ public class Terrains implements ITerrainFactory {
                                                 // will block magscan sensors?
     public static final int BLDG_BASE_COLLAPSED = 43; // 1 means collapsed
 
+    // Additional fluff types so that stacking of special images is possible
+    public static final int BLDG_FLUFF = 44; // Ideally used to denote special bldg images
+    public static final int ROAD_FLUFF = 45; // Ideally used to denote special road images
+    public static final int GROUND_FLUFF = 46; // Ideally used to denote special ground images
+                                            // these should be supers, not bases, as base image
+                                            // matching is not exact while super is
+    public static final int WATER_FLUFF = 47; // Ideally used to denote special water images
+
+    // Cliffs, use with exits to denote cliffsides; only valid when there's
+    // actually a level drop/rise in the specified direction
+    public static final int CLIFF_TOP = 48;
+    public static final int CLIFF_BOTTOM = 49;
+    
+    // Terrain for the incline at a hex edge towards a higher or lower 
+    // neighboring hex. Used to add highlighting/images to hex sides
+    // This is added to hexes automatically by MegaMek, not for
+    // manual use in the Editor
+    public static final int INCLINE_TOP = 50;
+    public static final int INCLINE_BOTTOM = 51;
+    
+    // Hex level differences of at least 3 levels, used with exits to 
+    // denote the hex side. Used to add highlighting/images to hex sides
+    // This is added to hexes automatically by MegaMek, not for
+    // manual use in the Editor
+    public static final int INCLINE_HIGH_TOP = 52;
+    public static final int INCLINE_HIGH_BOTTOM = 53;
+    
+    //TODO: + implement hidden in editor 
+    //TODO: + correct auto placement
+    //TODO: + auto place cliff-Bottom?
+    //TODO: shadows...
+    //TODO: Add gfx option
+    //TODO: + no saving of auto terrain
+    //TODO: cliff rules
+    //TODO: + only remove incline when cliff at the same exit
+    //TODO: + add lower 
+    //TODO: check: predict graphics when lower and hihger present?
+    //TODO: shadow/cliff interaction: bldgs/trees must become orthos! draw shadows over supers, orthos over shadows
+    //TODO: add decal level for rooftop stuff
+    //TODO: no backwards movement across sheer cliffs at all
+    //TODO: Mechs up cliff: PSR, +1 for lvl1 cliff +2 for lvl2 cliff, if lost, nothing happens, MP lost
+    //TODO: Mechs down cliff: PSR, +0 for lvl1 cliff +1 for lvl2 cliff, if lost, fall, movement over
+    //TODO: + Veh (exc VTOL/WIGE) up cliff: not possible; 
+    //TODO: up cliff WIGE: 1MP extra 
+    //TODO: Veh (exc VTOL/WIGE) down cliff: DSR, fail: Motive roll, move over; 
+    //TODO: down cliff VTOL/WIGE: no effect at all
+    //TODO: Inf: crazy
+    //TODO: check quadvee movement over cliffs
+    //TODO: hover skidding down cliff
+
     /**
      * Keeps track of the different type of terrains that can have exits.
      */
@@ -115,7 +167,13 @@ public class Terrains implements ITerrainFactory {
             "snow", "fire", "smoke", "geyser", "building", "bldg_cf", "bldg_elev", "bldg_basement_type", "bldg_class",
             "bldg_armor", "bridge", "bridge_cf", "bridge_elev", "fuel_tank", "fuel_tank_cf", "fuel_tank_elev",
             "fuel_tank_magn", "impassable", "elevator", "fortified", "screen", "fluff", "arms", "legs", "metal_deposit",
-            "bldg_base_collapsed" };
+            "bldg_base_collapsed", "bldg_fluff", "road_fluff", "ground_fluff", "water_fluff", "cliff_top", "cliff_bottom", 
+            "incline_top", "incline_bottom", "incline_high_top", "incline_high_bottom" };
+
+    /** These terrains are hidden in the Editor as they are handled internally. */
+    public static final HashSet<Integer> AUTOMATIC =
+            new HashSet<Integer>(Arrays.asList(
+                    INCLINE_TOP, INCLINE_BOTTOM, INCLINE_HIGH_TOP, INCLINE_HIGH_BOTTOM, CLIFF_BOTTOM));
 
     public static final int SIZE = names.length;
 
@@ -167,33 +225,58 @@ public class Terrains implements ITerrainFactory {
 
     public static String getDisplayName(int type, int level) {
         switch (type) {
+        case (BUILDING):
+            if (level == 1) {
+                return "Light building";
+            } else if (level == 2) {
+                return "Medium building";
+            } else if (level == 3) {
+                return "Heavy building";
+            } else if (level == 4) {
+                return "Hardened Building";
+            } else if (level == 5) {
+                return "Wall";
+            } else {
+                return "Building (unknown)";
+            }
+        case (BLDG_CLASS):
+            if (level == 0) {
+                return "Standard";
+            } else if (level == 1) {
+                return "Hangar";
+            } else if (level == 2) {
+                return "Fortress";
+            } else if (level == 3) {
+                return "Gun Emplacement";
+            } else {
+                return "Building Class (unknown)";
+            }
         case (WOODS):
             if (level == 1) {
                 return "Light woods";
-            }
-            if (level == 2) {
+            } else if (level == 2) {
                 return "Heavy woods";
-            }
-            if (level == 3) {
+            } else if (level == 3) {
                 return "Ultra-heavy woods";
+            } else {
+                return "Woods (unknown)";
             }
-            return "Woods (unknown)";
         case (ROUGH):
             if (level == 1) {
                 return "Rough";
-            }
-            if (level == 2) {
+            } else if (level == 2) {
                 return "Ultra rough";
+            } else {
+                return "Rough (unknown)";
             }
-            return "Rough (unknown)";
         case (RUBBLE):
             if (level < 6) {
                 return "Rubble";
-            }
-            if (level > 5) {
+            } else if (level > 5) {
                 return "Ultra rubble";
+            } else { //this will never be hit, as Level <6 and >5 mean all values are hit by the first two
+                return "Rubble (unknown)";
             }
-            return "Rubble (unknown)";
         case (WATER):
             return "Water (depth " + level + ")";
         case (PAVEMENT):
@@ -211,28 +294,23 @@ public class Terrains implements ITerrainFactory {
         case (SMOKE):
             if (level == SmokeCloud.SMOKE_LIGHT) {
                 return "Light smoke";
-            }
-            if (level == SmokeCloud.SMOKE_HEAVY) {
+            } else if (level == SmokeCloud.SMOKE_HEAVY) {
                 return "Heavy smoke";
-            }
-            if (level == SmokeCloud.SMOKE_LI_LIGHT) {
+            } else if (level == SmokeCloud.SMOKE_LI_LIGHT) {
                 return "LASER inhibiting smoke";
-            }
-            if (level == SmokeCloud.SMOKE_LI_HEAVY) {
+            } else if (level == SmokeCloud.SMOKE_LI_HEAVY) {
                 return "LASER inhibiting smoke";
-            }
-            if (level == SmokeCloud.SMOKE_CHAFF_LIGHT) {
+            } else if (level == SmokeCloud.SMOKE_CHAFF_LIGHT) {
                 return "Chaff (ECM)";
+            } else {
+                return "Smoke (unknown)";
             }
-            return "Smoke (unknown)";
         case (SWAMP):
-            if (level == 1) {
-                return "Swamp";
-            }
             if ((level == 2) || (level == 3)) {
                 return "Quicksand";
+            } else {
+                return "Swamp";
             }
-            return "Swamp";
         case (ICE):
             return "Ice";
         case (FORTIFIED):
@@ -240,53 +318,51 @@ public class Terrains implements ITerrainFactory {
         case (GEYSER):
             if (level == 1) {
                 return "Dormant";
-            }
-            if (level == 2) {
+            } else if (level == 2) {
                 return "Active";
-            }
-            if (level == 3) {
+            } else if (level == 3) {
                 return "Magma vent";
+            } else {
+                return "Geyser (unknown)";
             }
-            return "Geyser (unknown)";
         case (JUNGLE):
             if (level == 1) {
                 return "Light jungle";
-            }
-            if (level == 2) {
+            } else if (level == 2) {
                 return "Heavy jungle";
-            }
-            if (level == 3) {
+            } else if (level == 3) {
                 return "Ultra-heavy jungle";
+            } else {
+                return "Jungle (unknown)";
             }
-            return "Jungle (unknown)";
         case (MAGMA):
             if (level == 1) {
                 return "Magma crust";
-            }
-            if (level == 2) {
+            } else if (level == 2) {
                 return "Magma liquid";
+            } else {
+                return "Magma (unknown)";
             }
-            return "Magma (unknown)";
         case (MUD):
             return "Mud";
         case (RAPIDS):
             if (level == 1) {
                 return "Rapids";
-            }
-            if (level == 2) {
+            } else if (level == 2) {
                 return "Torrent";
+            } else {
+                return "Rapids (unknown)";
             }
-            return "Rapids (unknown)";
         case (SAND):
             return "Sand";
         case (SNOW):
             if (level == 1) {
                 return "Thin snow";
-            }
-            if (level == 2) {
+            } else if (level == 2) {
                 return "Heavy snow";
+            } else {
+                return "Snow (unknown)";
             }
-            return "Snow (unknown)";
         case (TUNDRA):
             return "Tundra";
         case (SPACE):
@@ -304,23 +380,21 @@ public class Terrains implements ITerrainFactory {
         case (METAL_CONTENT):
             if (level < 1) {
                 return "No metal content";
-            }
-            if (level == 1) {
+            } else if (level == 1) {
                 return "Very low metal content";
-            }
-            if (level == 2) {
+            } else if (level == 2) {
                 return "Low metal content";
-            }
-            if ((level == 3) || (level == 4)) {
+            } else if ((level == 3) || (level == 4)) {
                 return "Medium metal content";
-            }
-            if ((level == 5) || (level == 6)) {
+            } else if ((level == 5) || (level == 6)) {
                 return "High metal content";
-            }
-            if ((level == 7) || (level == 8)) {
+            } else if ((level == 7) || (level == 8)) {
                 return "Very high metal content";
+            } else {
+                return "Extremely high metal content";
             }
-            return "Extremely high metal content";
+        case (CLIFF_TOP):
+            return "Cliff-Top";
         default:
             return null;
         }
@@ -404,60 +478,49 @@ public class Terrains implements ITerrainFactory {
      */
     public static int getTerrainFactor(int type, int level) {
         switch (type) {
-        case (WOODS):
-            if (level == 1) {
-                return 50;
-            }
-            if (level == 2) {
-                return 90;
-            }
-            if (level == 3) {
-                return 130;
-            }
-            return 50;
-        case (ROUGH):
-            return 200;
-        case (PAVEMENT):
-            return 200;
-        case (ROAD):
-            return 150;
-        case (ICE):
-            return 40;
-        case (JUNGLE):
-            if (level == 1) {
-                return 50;
-            }
-            if (level == 2) {
-                return 90;
-            }
-            if (level == 3) {
-                return 130;
-            }
-            return 50;
-        case (MAGMA):
-            if (level == 1) {
+            case (WOODS):
+            case (JUNGLE):
+                if (level == 1) {
+                    return 50;
+                } else if (level == 2) {
+                    return 90;
+                } else if (level == 3) {
+                    return 130;
+                } else {
+                    return 50;
+                }
+            case (ROUGH):
+            case (PAVEMENT):
+                return 200;
+            case (ROAD):
+                return 150;
+            case (ICE):
+                return 40;
+            case (MAGMA):
+                if (level == 1) {
+                    return 30;
+                } else {
+                    return 0;
+                }
+            case (SAND):
+                return 100;
+            case (SNOW):
+                if (level == 1) {
+                    return 15;
+                } else if (level == 2) {
+                    return 30;
+                } else {
+                    return 15;
+                }
+            case (TUNDRA):
+                return 70;
+            case (FIELDS):
                 return 30;
-            }
-            return 0;
-        case (SAND):
-            return 100;
-        case (SNOW):
-            if (level == 1) {
-                return 15;
-            }
-            if (level == 2) {
-                return 30;
-            }
-            return 15;
-        case (TUNDRA):
-            return 70;
-        case (FIELDS):
-            return 30;
-        /*
-         * case(METAL_CONTENT): if(level < 1) { return 0; } return level;
-         */
-        default:
-            return 0;
+            /*
+             * case(METAL_CONTENT): if(level < 1) { return 0; } return level;
+             */
+            default:
+                return 0;
         }
     }
 
