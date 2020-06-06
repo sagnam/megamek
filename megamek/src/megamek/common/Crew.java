@@ -384,8 +384,8 @@ public class Crew implements Serializable {
     /**
      * @return a String showing the overall skills in the format gunnery/piloting
      */
-    public String getSkillsAsString() {
-        return getSkillsAsString(true);
+    public String getSkillsAsString(boolean rpgSkills) {
+        return getSkillsAsString(true, rpgSkills);
     }
 
     /**
@@ -393,9 +393,15 @@ public class Crew implements Serializable {
      *                     for other unit types)
      * @return a String showing the overall skills in the format gunnery/piloting
      */
-    public String getSkillsAsString(boolean showPiloting) {
+    public String getSkillsAsString(boolean showPiloting, boolean rpgSkills) {
         StringBuilder sb = new StringBuilder();
-        sb.append(getGunnery());
+        if (rpgSkills) {
+            sb.append(getGunneryL()).append("/");
+            sb.append(getGunneryM()).append("/");
+            sb.append(getGunneryB());
+        } else {
+            sb.append(getGunnery());
+        }
         if (showPiloting) {
             sb.append("/").append(getPiloting());
         }
@@ -405,8 +411,8 @@ public class Crew implements Serializable {
     /**
      * @return a String showing the skills for a particular slot in the format gunnery/piloting
      */
-    public String getSkillsAsString(int pos) {
-        return getSkillsAsString(pos, true);
+    public String getSkillsAsString(int pos, boolean rpgSkills) {
+        return getSkillsAsString(pos, true, rpgSkills);
     }
 
     /**
@@ -414,9 +420,15 @@ public class Crew implements Serializable {
      *                     for other unit types)
      * @return a String showing the skills for a particular slot in the format gunnery/piloting
      */
-    public String getSkillsAsString(int pos, boolean showPiloting) {
+    public String getSkillsAsString(int pos, boolean showPiloting, boolean rpgSkills) {
         StringBuilder sb = new StringBuilder();
-        sb.append(getGunnery(pos));
+        if (rpgSkills) {
+            sb.append(getGunneryL()).append("/");
+            sb.append(getGunneryM()).append("/");
+            sb.append(getGunneryB());
+        } else {
+            sb.append(getGunnery(pos));
+        }
         if (showPiloting) {
             sb.append("/").append(getPiloting(pos));
         }
