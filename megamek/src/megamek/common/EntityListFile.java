@@ -1182,9 +1182,9 @@ public class EntityListFile {
                     PilotOptions.LVL3_ADVANTAGES)));
         }
         if (crew.countOptions(PilotOptions.EDGE_ADVANTAGES) > 0) {
-            output.write("\" edge=\"");
-            output.write(String.valueOf(crew.getOptionList("::",
-                    PilotOptions.EDGE_ADVANTAGES)));
+            output.write("\" edge=\"edge " + crew.getOptions().intOption(OptionsConstants.EDGE));
+            String edgeString = String.valueOf(crew.getOptionList("::", PilotOptions.EDGE_ADVANTAGES));
+            output.write(edgeString.substring(edgeString.indexOf("::")));
         }
         if (crew.countOptions(PilotOptions.MD_ADVANTAGES) > 0) {
             output.write("\" implants=\"");
