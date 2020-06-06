@@ -838,12 +838,21 @@ class EntitySprite extends Sprite {
             if (entity.getCrew().getSlotCount() > 1) {
                 pnameStr += " (" + entity.getCrew().getCrewType().getRoleName(i) + ")";
             }
-            
-            addToTT("Pilot", NOBR,
-                    pnameStr, 
-                    entity.getCrew().getGunnery(i), 
-                    entity.getCrew().getPiloting(i));
-    
+
+            if (bv.game.getOptions().booleanOption(OptionsConstants.RPG_RPG_GUNNERY)) {
+                addToTT("RPGPilot", NOBR,
+                        pnameStr,
+                        entity.getCrew().getGunneryL(i),
+                        entity.getCrew().getGunneryM(i),
+                        entity.getCrew().getGunneryB(i),
+                        entity.getCrew().getPiloting(i));
+            } else {
+                addToTT("Pilot", NOBR,
+                        pnameStr,
+                        entity.getCrew().getGunnery(i),
+                        entity.getCrew().getPiloting(i));
+            }
+
             // Pilot Status
             if (!entity.getCrew().getStatusDesc(i).equals(""))
                 addToTT("PilotStatus", NOBR, 

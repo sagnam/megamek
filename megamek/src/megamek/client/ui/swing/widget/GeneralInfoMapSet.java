@@ -49,6 +49,7 @@ import megamek.common.options.IOptions;
 import megamek.common.options.OptionsConstants;
 import megamek.common.options.PilotOptions;
 import megamek.common.util.MegaMekFile;
+import megamek.common.util.generator.CrewSkillSummaryUtil;
 
 /**
  * Set of elements to represent general unit information in MechDisplay
@@ -305,7 +306,7 @@ public class GeneralInfoMapSet implements DisplayMapSet {
         if (en.getCrew() != null) {
             Crew c = en.getCrew();
             String pilotString = c.getDesc(c.getCurrentPilotIndex()) + " (";
-            pilotString += c.getGunnery() + "/" + c.getPiloting();
+            pilotString += CrewSkillSummaryUtil.getPilotSkillSummary(c, en.getGame().getOptions().booleanOption(OptionsConstants.RPG_RPG_GUNNERY));
             int crewAdvCount = c.countOptions(PilotOptions.LVL3_ADVANTAGES);
             if (crewAdvCount > 0) {
                 pilotString += ", +" + crewAdvCount;

@@ -752,7 +752,7 @@ public class WeaponAttackAction extends AbstractAttackAction implements Serializ
             toHit = new ToHitData(ae.getCrew().getGunnery(), "gunnery skill");
             if (game.getOptions().booleanOption(OptionsConstants.RPG_RPG_GUNNERY)) {
                 if (wtype.hasFlag(WeaponType.F_ENERGY)) {
-                    toHit = new ToHitData(ae.getCrew().getGunneryL(), "gunnery (E) skill");
+                    toHit = new ToHitData(ae.getCrew().getGunneryL(), "gunnery (L) skill");
                 }
                 if (wtype.hasFlag(WeaponType.F_MISSILE)) {
                     toHit = new ToHitData(ae.getCrew().getGunneryM(), "gunnery (M) skill");
