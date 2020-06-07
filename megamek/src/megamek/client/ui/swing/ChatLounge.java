@@ -1934,10 +1934,7 @@ public class ChatLounge extends AbstractPhaseDisplay
         int posQuirkCount = entity.countQuirks(Quirks.POS_QUIRKS);
         int negQuirkCount = entity.countQuirks(Quirks.NEG_QUIRKS);
 
-        String gunnery = Integer.toString(entity.getCrew().getGunnery());
-        if (rpgSkills) {
-            gunnery = entity.getCrew().getGunneryRPG();
-        }
+        String gunnery = entity.getCrew().getSkillsAsString(false, rpgSkills);
 
         if (blindDrop) {
             String unitClass;

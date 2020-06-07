@@ -839,19 +839,9 @@ class EntitySprite extends Sprite {
                 pnameStr += " (" + entity.getCrew().getCrewType().getRoleName(i) + ")";
             }
 
-            if (bv.game.getOptions().booleanOption(OptionsConstants.RPG_RPG_GUNNERY)) {
-                addToTT("RPGPilot", NOBR,
-                        pnameStr,
-                        entity.getCrew().getGunneryL(i),
-                        entity.getCrew().getGunneryM(i),
-                        entity.getCrew().getGunneryB(i),
-                        entity.getCrew().getPiloting(i));
-            } else {
-                addToTT("Pilot", NOBR,
-                        pnameStr,
-                        entity.getCrew().getGunnery(i),
-                        entity.getCrew().getPiloting(i));
-            }
+            addToTT("Pilot", NOBR, pnameStr,
+                    entity.getCrew().getSkillsAsString(
+                            bv.game.getOptions().booleanOption(OptionsConstants.RPG_RPG_GUNNERY)));
 
             // Pilot Status
             if (!entity.getCrew().getStatusDesc(i).equals(""))

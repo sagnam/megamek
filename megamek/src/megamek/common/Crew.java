@@ -26,6 +26,7 @@ import megamek.common.options.IOption;
 import megamek.common.options.IOptionGroup;
 import megamek.common.options.OptionsConstants;
 import megamek.common.options.PilotOptions;
+import megamek.common.util.CrewSkillSummaryUtil;
 
 /**
  *  Health status, skills, and miscellanea for an Entity crew.
@@ -394,18 +395,22 @@ public class Crew implements Serializable {
      * @return a String showing the overall skills in the format gunnery/piloting
      */
     public String getSkillsAsString(boolean showPiloting, boolean rpgSkills) {
-        StringBuilder sb = new StringBuilder();
-        if (rpgSkills) {
-            sb.append(getGunneryL()).append("/");
-            sb.append(getGunneryM()).append("/");
-            sb.append(getGunneryB());
-        } else {
-            sb.append(getGunnery());
-        }
         if (showPiloting) {
-            sb.append("/").append(getPiloting());
+            return CrewSkillSummaryUtil.getPilotSkillSummary(
+                    getGunnery(),
+                    getGunneryL(),
+                    getGunneryM(),
+                    getGunneryB(),
+                    getPiloting(),
+                    rpgSkills);
+        } else {
+            return CrewSkillSummaryUtil.getGunnnerySkillSummary(
+                    getGunnery(),
+                    getGunneryL(),
+                    getGunneryM(),
+                    getGunneryB(),
+                    rpgSkills);
         }
-        return sb.toString();
     }
 
     /**
@@ -421,18 +426,22 @@ public class Crew implements Serializable {
      * @return a String showing the skills for a particular slot in the format gunnery/piloting
      */
     public String getSkillsAsString(int pos, boolean showPiloting, boolean rpgSkills) {
-        StringBuilder sb = new StringBuilder();
-        if (rpgSkills) {
-            sb.append(getGunneryL()).append("/");
-            sb.append(getGunneryM()).append("/");
-            sb.append(getGunneryB());
-        } else {
-            sb.append(getGunnery(pos));
-        }
         if (showPiloting) {
-            sb.append("/").append(getPiloting(pos));
+            return CrewSkillSummaryUtil.getPilotSkillSummary(
+                    getGunnery(pos),
+                    getGunneryL(pos),
+                    getGunneryM(pos),
+                    getGunneryB(pos),
+                    getPiloting(pos),
+                    rpgSkills);
+        } else {
+            return CrewSkillSummaryUtil.getGunnnerySkillSummary(
+                    getGunnery(pos),
+                    getGunneryL(pos),
+                    getGunneryM(pos),
+                    getGunneryB(pos),
+                    rpgSkills);
         }
-        return sb.toString();
     }
 
     /**
@@ -947,20 +956,6 @@ public class Crew implements Serializable {
      */
     public void setEjected(boolean abandoned) {
         ejected = abandoned;
-    }
-
-    /**
-     * @return a string description of the gunnery skills when using RPG
-     */
-    public String getGunneryRPG() {
-        return new StringBuilder()
-            .append(Arrays.toString(gunneryL))
-            .append("(L)/")
-            .append(Arrays.toString(gunneryM))
-            .append("(M)/")
-            .append(Arrays.toString(gunneryB))
-            .append("(B)")
-            .toString();
     }
 
     /**
