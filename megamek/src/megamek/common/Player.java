@@ -82,6 +82,12 @@ public final class Player extends TurnOrdered implements IPlayer {
      */
     private boolean allowingTeamChange = false;
 
+    /**
+     * Boolean that keeps track of whether a player has accepted another
+     * player's request to change unit facing.
+     */
+    private boolean allowingFacingChange = false;
+
     @Override
     public Vector<Minefield> getMinefields() {
         return visibleMinefields;
@@ -367,6 +373,16 @@ public final class Player extends TurnOrdered implements IPlayer {
     @Override
     public boolean isAllowingTeamChange(){
         return allowingTeamChange;
+    }
+
+    @Override
+    public void setAllowFacingChange(boolean allowChange){
+        allowingFacingChange = allowChange;
+    }
+    
+    @Override
+    public boolean isAllowingFacingChange(){
+        return allowingFacingChange;
     }
 
     @Override

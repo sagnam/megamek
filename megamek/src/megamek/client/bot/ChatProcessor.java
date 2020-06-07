@@ -30,6 +30,7 @@ import megamek.common.logging.LogLevel;
 import megamek.common.util.StringUtil;
 import megamek.server.Server;
 import megamek.server.commands.DefeatCommand;
+import megamek.server.commands.FixFacingCommand;
 import megamek.server.commands.JoinTeamCommand;
 
 public class ChatProcessor {
@@ -118,6 +119,8 @@ public class ChatProcessor {
             String msg = st.nextToken();
             if (msg.contains(JoinTeamCommand.SERVER_VOTE_PROMPT_MSG)) {
                 bot.sendChat("/allowTeamChange");
+            } else if (msg.contains(FixFacingCommand.SERVER_VOTE_PROMPT_MSG)) {
+                bot.sendChat("/allowFacingChange");
             }
             return;
         } else if (p == null) {
