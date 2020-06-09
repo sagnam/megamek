@@ -1090,8 +1090,6 @@ public class EntityListFile {
         output.write("\" name=\"" + crew.getName(pos).replaceAll("\"", "&quot;"));
         output.write("\" nick=\"");
         output.write(crew.getNickname(pos).replaceAll("\"", "&quot;"));
-        output.write("\" gunnery=\"");
-        output.write(String.valueOf(crew.getGunnery(pos)));
         if ((null != entity.getGame())
                 && entity.getGame().getOptions()
                         .booleanOption(OptionsConstants.RPG_RPG_GUNNERY)) {
@@ -1101,6 +1099,9 @@ public class EntityListFile {
             output.write(String.valueOf(crew.getGunneryM(pos)));
             output.write("\" gunneryB=\"");
             output.write(String.valueOf(crew.getGunneryB(pos)));
+        } else {
+            output.write("\" gunnery=\"");
+            output.write(String.valueOf(crew.getGunnery(pos)));
         }
         output.write("\" piloting=\"");
         output.write(String.valueOf(crew.getPiloting(pos)));
