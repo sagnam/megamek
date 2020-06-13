@@ -4416,6 +4416,10 @@ public abstract class Mech extends Entity {
         bvText.append(endColumn);
         bvText.append(endRow);
 
+        double laserBV = 0.0;
+        double ballisticBV = 0.0;
+        double missileBV = 0.0;
+
         // here we store the modified BV and heat of all heat-using weapons,
         // to later be sorted by BV
         ArrayList<ArrayList<Object>> heatBVs = new ArrayList<ArrayList<Object>>();
@@ -4583,6 +4587,18 @@ public abstract class Mech extends Entity {
                 dBV /= 2;
             }
 
+            BigInteger weaponType = null;
+
+            if (wtype.hasFlag(WeaponType.F_ENERGY)) {
+                weaponType = WeaponType.F_ENERGY;
+            } else if (wtype.hasFlag(WeaponType.F_BALLISTIC)) {
+                weaponType = WeaponType.F_BALLISTIC;
+            } else if (wtype.hasFlag(WeaponType.F_MISSILE)) {
+                weaponType = WeaponType.F_MISSILE;
+            } else if (wtype.hasFlag(MiscType.F_CLUB)) {
+                weaponType = MiscType.F_CLUB;
+            }
+
             // ArrayList that stores weapon values
             // stores a double first (BV), then an Integer (heat),
             // then a String (weapon name)
@@ -4593,10 +4609,12 @@ public abstract class Mech extends Entity {
                 weaponValues.add(dBV);
                 weaponValues.add(weaponHeat);
                 weaponValues.add(weaponName);
+                weaponValues.add(weaponType);
                 heatBVs.add(weaponValues);
             } else {
                 weaponValues.add(dBV);
                 weaponValues.add(weaponName);
+                weaponValues.add(weaponType);
                 nonHeatBVs.add(weaponValues);
             }
 
@@ -4644,6 +4662,7 @@ public abstract class Mech extends Entity {
                             weaponValues.add((double) getActiveVibrobladeHeat(
                                     location, true));
                             weaponValues.add(mount.getName());
+                            weaponValues.add(MiscType.F_CLUB);
                             heatBVs.add(weaponValues);
 
                             bvText.append(startRow);
@@ -4700,6 +4719,14 @@ public abstract class Mech extends Entity {
         for (ArrayList<Object> nonHeatWeapon : nonHeatBVs) {
             weaponBV += (Double) nonHeatWeapon.get(0);
 
+            if (nonHeatWeapon.get(2) == WeaponType.F_ENERGY) {
+                laserBV += (Double) nonHeatWeapon.get(0);
+            } else if (nonHeatWeapon.get(2) == WeaponType.F_BALLISTIC) {
+                ballisticBV += (Double) nonHeatWeapon.get(0);
+            } else if (nonHeatWeapon.get(2) == WeaponType.F_MISSILE) {
+                missileBV += (Double) nonHeatWeapon.get(0);
+            }
+
             bvText.append(startRow);
             bvText.append(startColumn);
             bvText.append(nonHeatWeapon.get(1));
@@ -4750,6 +4777,17 @@ public abstract class Mech extends Entity {
 
                 bvText.append(weaponValues.get(2));
                 weaponBV += (Double) weaponValues.get(0);
+
+
+                if (weaponValues.get(3) == WeaponType.F_ENERGY) {
+                    laserBV += (Double) weaponValues.get(0);
+                } else if (weaponValues.get(3) == WeaponType.F_BALLISTIC) {
+                    ballisticBV += (Double) weaponValues.get(0);
+                } else if (weaponValues.get(3) == WeaponType.F_MISSILE) {
+                    missileBV += (Double) weaponValues.get(0);
+                }
+
+
                 bvText.append(endColumn);
                 bvText.append(startColumn);
                 bvText.append(endColumn);
@@ -4814,6 +4852,15 @@ public abstract class Mech extends Entity {
                 }
                 heatAdded += (Double) weaponValues.get(1);
                 weaponBV += dBV;
+
+                if (weaponValues.get(3) == WeaponType.F_ENERGY) {
+                    laserBV += (Double) weaponValues.get(0);
+                } else if (weaponValues.get(3) == WeaponType.F_BALLISTIC) {
+                    ballisticBV += (Double) weaponValues.get(0);
+                } else if (weaponValues.get(3) == WeaponType.F_MISSILE) {
+                    missileBV += (Double) weaponValues.get(0);
+                }
+
                 bvText.append(endColumn);
                 bvText.append(startColumn);
                 bvText.append(dBV);
@@ -4830,6 +4877,7 @@ public abstract class Mech extends Entity {
                 bvText.append(endRow);
             }
         }
+
         bvText.append(startRow);
         bvText.append(startColumn);
         bvText.append(endColumn);
@@ -5287,7 +5335,16 @@ public abstract class Mech extends Entity {
         // and then factor in pilot
         double pilotFactor = 1;
         if (!ignorePilot) {
-            pilotFactor = getCrew().getBVSkillMultiplier(game);
+            double gunneryBVTotal = laserBV + missileBV + ballisticBV;
+            if (game != null && game.getOptions().booleanOption(OptionsConstants.RPG_RPG_GUNNERY) && (gunneryBVTotal > 0)) {
+                int pilotVal = getCrew().getPiloting();
+                double skillMultiplier = (Crew.getBVSkillMultiplier(getCrew().getGunneryL(), pilotVal, game) * laserBV / gunneryBVTotal)
+                        + (Crew.getBVSkillMultiplier(getCrew().getGunneryB(), pilotVal, game) * ballisticBV / gunneryBVTotal)
+                        + (Crew.getBVSkillMultiplier(getCrew().getGunneryM(), pilotVal, game) * missileBV / gunneryBVTotal);
+                pilotFactor = skillMultiplier * getCrew().getBVImplantMultiplier();
+            } else {
+                pilotFactor = getCrew().getBVSkillMultiplier(game);
+            }
         }
 
         int retVal = (int) Math.round((finalBV) * pilotFactor);
